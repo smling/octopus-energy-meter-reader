@@ -5,7 +5,10 @@ Vallilia JS Application to get data from Octopuse API and render chart in specif
 1. Valid Octopus API Key should be exists;
 
 ## Installation ##
-1. Execute `index.html` to run application.
+1. Execute `index.html?apikey={{API_KEY}}` to run application. Example:
+    ```
+    http://localhost/index.html?apikey=A1234567
+    ```
 
 ## Usage ##
 :construction: In Progress :construction:

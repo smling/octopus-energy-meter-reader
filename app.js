@@ -5,7 +5,7 @@ import { ObjectHelper } from "./utilities/ObjectHelper.js";
 // HTML elelment defined here.
 const startDateTimeInputElement = document.getElementById("startDateTime");
 const endDateTimeInputElement = document.getElementById("endDateTime");
-
+const loadButtonElement = document.getElementById("load");
 const chartCanvesElement = document.getElementById('chart');
 
 // Constant
@@ -158,6 +158,13 @@ function resetUI() {
     startDateTimeInputElement.value =  startDate.toFormat("yyyy-LL-dd'T'HH:mm");
 }
 
+function resetData() {
+    const electricityMeter = CONSTANTS.octopus.meters.filter(function(item) {
+        return item.type === "ELECTRICITY";
+    })[0];
+    getConsumptions(electricityMeter.mpan, electricityMeter.serialNumber, startDateTimeInputElement.value, endDateTimeInputElement.value);
+}
+
 // Event listener defined here.
 window.addEventListener("resize", function(event) {
     console.debug("window resized.");
@@ -172,10 +179,7 @@ window.addEventListener("resize", function(event) {
 
 document.addEventListener("DOMContentLoaded", function() {
     resetUI();
-    const electricityMeter = CONSTANTS.octopus.meters.filter(function(item) {
-        return item.type === "ELECTRICITY";
-    })[0];
-    getConsumptions(electricityMeter.mpan, electricityMeter.serialNumber, startDateTimeInputElement.value, endDateTimeInputElement.value);
+    resetData();
 });
 
 document.addEventListener("consumptionsCollected", function(event) {
@@ -217,6 +221,9 @@ document.addEventListener("productStandardUnitRatesCollected", function(event) {
         }
     });
     console.log(chartDataSource);
+    if(chart) {
+        chart.destroy();
+    }
     chart = renderChart();
 });
 
@@ -228,3 +235,7 @@ startDateTimeInputElement.addEventListener("input", function(event) {
 endDateTimeInputElement.addEventListener("input", function(event) {
     console.log("endDate changed");
 });
+
+loadButtonElement.addEventListener("click", function(event) {
+    resetData();
+})
