@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Octopus Energy Meter Reading</title>
+    </head>
+    <body>
+        <table>
+            <caption>Search Criteria</caption>
+            <tr>
+                <td>
+                    <label for="startDateTime">
+                        Start Date and Time<br>
+                        <input type="datetime-local" id="startDateTime">
+                    </label>
+                </td>
+                <td>
+                    <label for="endDateTime">
+                        End Date and Time<br>
+                        <input type="datetime-local" id="endDateTime">
+                    </label>
+                </td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>
+                    <label for="startDateTime">
+                       MPAN<br>
+                        <input type="text" id="mpan">
+                    </label>
+                </td>
+                <td>
+                    <label for="startDateTime">
+                        Serial Number<br>
+                        <input type="text" id="serialNumber">
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <button>Load</button>
+                </td>
+            </tr>
+        </table>
+        
+        <div>
+            <canvas id="chart"></canvas>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.3/build/global/luxon.min.js"></script>
+        <script type="module" src="app.js"></script>
+    </body>
+</html>
