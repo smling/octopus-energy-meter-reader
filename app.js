@@ -1,4 +1,5 @@
 import { CONSTANTS } from "./constants.js";
+import OctopusService from "./services/OctopusService.js";
 import { ArrayHelper } from "./utilities/ArrayHelper.js";
 import { ObjectHelper } from "./utilities/ObjectHelper.js";
 
@@ -10,83 +11,11 @@ const chartCanvesElement = document.getElementById('chart');
 
 // Constant
 const DateTime = luxon.DateTime;
+const octopusService = new OctopusService(CONSTANTS.octopus.root, CONSTANTS.octopus.apiKey);
 
 // Global variables.
-let productStandardUnitRates = null;
-let consumptionData = null;
 let chart = null;
 let chartDataSource = [];
-
-// Function defined here.
-
-function getConsumptions(mpan, serialNumber, startDateTime = new Date(), endDateTime = new Date(), page = 1, results = []) {
-    const requestUrl = generateElectricityMeterConsumptionUrl(mpan, serialNumber, startDateTime, endDateTime, page);
-    const _http = createDefaultXMLHttpRequest("GET", requestUrl);
-    _http.onreadystatechange = function() {
-        if(_http.readyState === XMLHttpRequest.DONE) {
-            if(_http.status === 200) {
-                const respons = JSON.parse(_http.response);
-                if(!ObjectHelper.isNullOrUndefined(respons?.next)) {
-                    results.push(...respons.results);
-                    page = page + 1;
-                    getConsumptions(mpan, serialNumber, startDateTime, endDateTime, page, results);
-                } else {
-                    console.log(`consumption loaded. Number of records: ${results.length}`);
-                    const consumptionCollected = new CustomEvent("consumptionsCollected", {detail: {
-                        results: results
-                    }});
-                    document.dispatchEvent(consumptionCollected);
-                }
-            }
-        }
-    };
-    _http.send();
-}
-
-function getProductStandardUnitRates(productCode, trafficCode, startDateTime = new Date(), endDateTime = new Date(), page = 1, results = []) {
-    const requestUrl = generateElectricityProductStandardUnitRatesUrl(productCode, trafficCode, startDateTime, endDateTime, page);
-    const _http = createDefaultXMLHttpRequest("GET", requestUrl);
-    _http.onreadystatechange = function() {
-        if(_http.readyState === XMLHttpRequest.DONE) {
-            if(_http.status === 200) {
-                const respons = JSON.parse(_http.response);
-                if(!ObjectHelper.isNullOrUndefined(respons?.next)) {
-                    results.push(...respons.results);
-                    page = page + 1;
-                    getProductStandardUnitRates(productCode, trafficCode, startDateTime, endDateTime, page, results);
-                } else {
-                    console.log(`product standard unit rate loaded. Number of records: ${results.length}`);
-                    const consumptionCollected = new CustomEvent("productStandardUnitRatesCollected", {detail: {
-                        results: results
-                    }});
-                    document.dispatchEvent(consumptionCollected);
-                }
-            }
-        }
-    };
-    _http.send();
-}
-
-function createDefaultXMLHttpRequest(method, requestUrl) {
-    const http = new XMLHttpRequest();
-    http.open(method, requestUrl, true);
-    http.setRequestHeader("Accept", "application/json");
-    http.setRequestHeader("authorization", `Basic ${generateEncodedApiKey(CONSTANTS.octopus.apiKey)}`);
-    return http;
-}
-
-function generateElectricityMeterConsumptionUrl(mpan, serialNumber, startDateTime, endDateTime, page) {
-    return `${CONSTANTS.octopus.root}/v1/electricity-meter-points/${mpan}/meters/${serialNumber}/consumption/?page=${page}&period_from=${startDateTime}&period_to=${endDateTime}`;
-}
-
-function generateElectricityProductStandardUnitRatesUrl(productCode, trafficCode, startDateTime, endDateTime, page) {
-    return `${CONSTANTS.octopus.root}/v1/products/${productCode}/electricity-tariffs/${trafficCode}/standard-unit-rates/?page=${page}&period_from=${startDateTime}&period_to=${endDateTime}`;
-}
-
-function generateEncodedApiKey(apiKey) {
-    return btoa(apiKey+":");
-}
-
 
 function renderChart() {
     if(ObjectHelper.isNullOrUndefined(chartDataSource)) {
@@ -106,8 +35,6 @@ function renderChart() {
            data: chartDataSource.map(o=>o.valueIncludeVat),
            yAxisID: "price"
         }],
-        // labels: chartDataSource
-        //     .map(o=> DateTime.fromISO(o.startDateTime).toFormat("yyyy-LL-dd HH:mm"))
         labels: renderChartLabel(chartDataSource)
     };
     return new Chart(chartCanvesElement, {
@@ -117,18 +44,12 @@ function renderChart() {
                 price: {
                     type: "linear",
                     position: "left",
-                    beginAtZero: true,
-                    // ticks: {
-                    //     min: -10
-                    // }
+                    beginAtZero: true
                 },
                 kw: {
                     type: "linear",
                     position: "right",
-                    beginAtZero: true,
-                    // ticks: {
-                    //     min: -10
-                    // }
+                    beginAtZero: true
                 }
             }
         }
@@ -152,26 +73,24 @@ function renderChartLabel(chartDataSource) {
 }
 
 function resetUI() {
-    const endDate = DateTime.now();
+    const endDate = DateTime.now().plus({day:1});
     endDateTimeInputElement.value = endDate.toFormat("yyyy-LL-dd'T'HH:mm");
     const startDate = endDate.minus({week: 1});
     startDateTimeInputElement.value =  startDate.toFormat("yyyy-LL-dd'T'HH:mm");
 }
 
 function resetData() {
+    chartDataSource = [];
     const electricityMeter = CONSTANTS.octopus.meters.filter(function(item) {
         return item.type === "ELECTRICITY";
     })[0];
-    getConsumptions(electricityMeter.mpan, electricityMeter.serialNumber, startDateTimeInputElement.value, endDateTimeInputElement.value);
+    octopusService.getConsumptions(electricityMeter.mpan, electricityMeter.serialNumber, startDateTimeInputElement.value, endDateTimeInputElement.value);
 }
 
 // Event listener defined here.
 window.addEventListener("resize", function(event) {
     console.debug("window resized.");
     if(ObjectHelper.isNullOrUndefined(chart)) {
-        const context = chartCanvesElement.getContext("2D");
-        // context.width = this.window.innerWidth;
-        // context.height = this.window.innerHeight;
         chart.resize(chartCanvesElement.parentElement.offsetWidth, chartCanvesElement.parentElement.offsetHeight-200);
         chart.update();
     }
@@ -201,7 +120,7 @@ document.addEventListener("consumptionsCollected", function(event) {
     const electricityProduct = CONSTANTS.octopus.products.filter(function(item) {
         return item.type === "ELECTRICITY";
     })[0];
-    getProductStandardUnitRates(electricityProduct.productCode, electricityProduct.trafficCode, startDateTimeInputElement.value, endDateTimeInputElement.value);
+    octopusService.getProductStandardUnitRates(electricityProduct.productCode, electricityProduct.trafficCode, startDateTimeInputElement.value, endDateTimeInputElement.value);
 });
 
 document.addEventListener("productStandardUnitRatesCollected", function(event) {
@@ -229,7 +148,7 @@ document.addEventListener("productStandardUnitRatesCollected", function(event) {
 
 startDateTimeInputElement.addEventListener("input", function(event) {
     console.log("startDate changed");
-    endDateTimeInputElement.min = event.detail.value;
+    endDateTimeInputElement.min = event.currentTarget.value;
 });
 
 endDateTimeInputElement.addEventListener("input", function(event) {

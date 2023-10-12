@@ -2,51 +2,60 @@
 <html lang="en">
     <head>
         <title>Octopus Energy Meter Reading</title>
+        <link re="stylesheet" type="text/css" href="style.css">
     </head>
     <body>
-        <table>
-            <caption>Search Criteria</caption>
-            <tr>
-                <td>
-                    <label for="startDateTime">
-                        Start Date and Time<br>
-                        <input type="datetime-local" id="startDateTime">
-                    </label>
-                </td>
-                <td>
-                    <label for="endDateTime">
-                        End Date and Time<br>
-                        <input type="datetime-local" id="endDateTime">
-                    </label>
-                </td>
-                <td>&nbsp;</td>
-            </tr>
-            <tr>
-                <td>
-                    <label for="MPAN">
-                       MPAN<br>
-                        <input type="text" id="mpan">
-                    </label>
-                </td>
-                <td>
-                    <label for="serialNumber">
-                        Serial Number<br>
-                        <input type="text" id="serialNumber">
-                    </label>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <button id="load">Load</button>
-                </td>
-            </tr>
-        </table>
-        
         <div>
             <canvas id="chart"></canvas>
         </div>
+        <div id="myWindow" class="window">
+            <div class="window-top">
+                <button class="round green"></button><button class="round yellow"></button><button class="round red"></button>
+            </div>
+            <div class="window-content">
+                <table>
+                    <caption>Search Criteria</caption>
+                    <tr>
+                        <td>
+                            <label for="startDateTime">
+                                Start Date and Time<br>
+                                <input type="datetime-local" id="startDateTime">
+                            </label>
+                        </td>
+                        <td>
+                            <label for="endDateTime">
+                                End Date and Time<br>
+                                <input type="datetime-local" id="endDateTime">
+                            </label>
+                        </td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label for="MPAN">
+                               MPAN<br>
+                                <input type="text" id="mpan">
+                            </label>
+                        </td>
+                        <td>
+                            <label for="serialNumber">
+                                Serial Number<br>
+                                <input type="text" id="serialNumber">
+                            </label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button id="load">Load</button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>       
+        
         <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/luxon@3.4.3/build/global/luxon.min.js"></script>
+        <script src="window.js"></script>
         <script type="module" src="app.js"></script>
     </body>
 </html>
