@@ -7,7 +7,8 @@ import { ObjectHelper } from "./utilities/ObjectHelper.js";
 const startDateTimeInputElement = document.getElementById("startDateTime");
 const endDateTimeInputElement = document.getElementById("endDateTime");
 const loadButtonElement = document.getElementById("load");
-const chartCanvesElement = document.getElementById('chart');
+const chartCanvesElement = document.getElementById("chart");
+const searchCriteriaWindowElement = document.getElementById("searchCriteriaWindow");
 
 // Constant
 const DateTime = luxon.DateTime;
@@ -16,6 +17,10 @@ const octopusService = new OctopusService(CONSTANTS.octopus.root, CONSTANTS.octo
 // Global variables.
 let chart = null;
 let chartDataSource = [];
+
+
+let isDragging = false;
+let offsetX, offsetY;
 
 function renderChart() {
     if(ObjectHelper.isNullOrUndefined(chartDataSource)) {
@@ -90,9 +95,8 @@ function resetData() {
 // Event listener defined here.
 window.addEventListener("resize", function(event) {
     console.debug("window resized.");
-    if(ObjectHelper.isNullOrUndefined(chart)) {
-        chart.resize(chartCanvesElement.parentElement.offsetWidth, chartCanvesElement.parentElement.offsetHeight-200);
-        chart.update();
+    if(!ObjectHelper.isNullOrUndefined(chart)) {
+        chart.resize(this.window.innerWidth, this.window.innerHeight - 200);
     }
 })
 
@@ -158,3 +162,23 @@ endDateTimeInputElement.addEventListener("input", function(event) {
 loadButtonElement.addEventListener("click", function(event) {
     resetData();
 })
+
+searchCriteriaWindowElement.addEventListener('mousedown', (e) => {
+    console.log("mouseDown event hit");
+    isDragging = true;
+    offsetX = e.clientX - searchCriteriaWindowElement.getBoundingClientRect().left;
+    offsetY = e.clientY - searchCriteriaWindowElement.getBoundingClientRect().top;
+    searchCriteriaWindowElement.style.cursor = 'grabbing';
+  });
+
+document.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+        searchCriteriaWindowElement.style.left = e.clientX - offsetX + 'px';
+        searchCriteriaWindowElement.style.top = e.clientY - offsetY + 'px';
+    }
+  });
+  
+  document.addEventListener('mouseup', () => {
+    isDragging = false;
+    searchCriteriaWindowElement.style.cursor = 'grab';
+  });
