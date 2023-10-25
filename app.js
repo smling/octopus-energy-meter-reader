@@ -2,6 +2,7 @@ import { CONSTANTS } from "./constants.js";
 import OctopusService from "./services/OctopusService.js";
 import { ArrayHelper } from "./utilities/ArrayHelper.js";
 import { ObjectHelper } from "./utilities/ObjectHelper.js";
+import { UrlHelper } from "./utilities/UrlHelper.js";
 
 // HTML elelment defined here.
 const startDateTimeInputElement = document.getElementById("startDateTime");
@@ -12,7 +13,7 @@ const searchCriteriaWindowElement = document.getElementById("searchCriteriaWindo
 
 // Constant
 const DateTime = luxon.DateTime;
-const octopusService = new OctopusService(CONSTANTS.octopus.root, CONSTANTS.octopus.apiKey);
+const octopusService = new OctopusService(CONSTANTS.octopus.root, UrlHelper.getUrlParameterValue("apikey"));
 
 // Global variables.
 let chart = null;
@@ -151,7 +152,6 @@ document.addEventListener("productStandardUnitRatesCollected", function(event) {
 });
 
 startDateTimeInputElement.addEventListener("input", function(event) {
-    console.log("startDate changed");
     endDateTimeInputElement.min = event.currentTarget.value;
 });
 
@@ -164,7 +164,6 @@ loadButtonElement.addEventListener("click", function(event) {
 })
 
 searchCriteriaWindowElement.addEventListener('mousedown', (e) => {
-    console.log("mouseDown event hit");
     isDragging = true;
     offsetX = e.clientX - searchCriteriaWindowElement.getBoundingClientRect().left;
     offsetY = e.clientY - searchCriteriaWindowElement.getBoundingClientRect().top;

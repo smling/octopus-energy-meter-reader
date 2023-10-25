@@ -1,7 +1,7 @@
 export const CONSTANTS = {
     octopus: {
         root : "https://api.octopus.energy",
-        apiKey : "sk_live_QvP48hJPAhIa1P6RjAXXbLE2",
+        apiKey : "",
         products: [{
             type : "ELECTRICITY",
             productCode : "AGILE-FLEX-22-11-25",
