@@ -13,7 +13,10 @@ const searchCriteriaWindowElement = document.getElementById("searchCriteriaWindo
 
 // Constant
 const DateTime = luxon.DateTime;
-const octopusService = new OctopusService(CONSTANTS.octopus.root, UrlHelper.getUrlParameterValue("apikey"));
+const settings = JSON.parse(UrlHelper.getDeserializedUrlParameterValue("settings"));
+const octopusProvider = settings.providers.filter((item) => item.provider.toUpperCase() === "OCTOPUS")[0];
+const octopusService = new OctopusService(CONSTANTS.octopus.root, octopusProvider.settings.apikey);
+//const octopusService = new OctopusService(CONSTANTS.octopus.root, UrlHelper.getUrlParameterValue("apikey"));
 
 // Global variables.
 let chart = null;
@@ -79,17 +82,15 @@ function renderChartLabel(chartDataSource) {
 }
 
 function resetUI() {
-    const endDate = DateTime.now().plus({day:1});
+    const endDate = DateTime.now().plus({day: CONSTANTS.settings.endAfterToday});
     endDateTimeInputElement.value = endDate.toFormat("yyyy-LL-dd'T'HH:mm");
-    const startDate = endDate.minus({week: 1});
+    const startDate = endDate.minus({day: CONSTANTS.settings.startBeforeToday});
     startDateTimeInputElement.value =  startDate.toFormat("yyyy-LL-dd'T'HH:mm");
 }
 
 function resetData() {
     chartDataSource = [];
-    const electricityMeter = CONSTANTS.octopus.meters.filter(function(item) {
-        return item.type === "ELECTRICITY";
-    })[0];
+    const electricityMeter = octopusProvider.settings.meters.filter(o => o.trafficCode.charAt(0) === "E")[0];
     octopusService.getConsumptions(electricityMeter.mpan, electricityMeter.serialNumber, startDateTimeInputElement.value, endDateTimeInputElement.value);
 }
 
@@ -122,9 +123,7 @@ document.addEventListener("consumptionsCollected", function(event) {
             target[0].consumption = value.consumption;
         }
     });
-    const electricityProduct = CONSTANTS.octopus.products.filter(function(item) {
-        return item.type === "ELECTRICITY";
-    })[0];
+    const electricityProduct = octopusProvider.settings.products.filter(o => o.trafficCode.charAt(0) === "E")[0];
     octopusService.getProductStandardUnitRates(electricityProduct.productCode, electricityProduct.trafficCode, startDateTimeInputElement.value, endDateTimeInputElement.value);
 });
 
