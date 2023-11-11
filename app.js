@@ -16,7 +16,6 @@ const DateTime = luxon.DateTime;
 const settings = JSON.parse(UrlHelper.getDeserializedUrlParameterValue("settings"));
 const octopusProvider = settings.providers.filter((item) => item.provider.toUpperCase() === "OCTOPUS")[0];
 const octopusService = new OctopusService(CONSTANTS.octopus.root, octopusProvider.settings.apikey);
-//const octopusService = new OctopusService(CONSTANTS.octopus.root, UrlHelper.getUrlParameterValue("apikey"));
 
 // Global variables.
 let chart = null;
@@ -40,10 +39,15 @@ function renderChart() {
             yAxisID: "kw"
         },{
            type: "bar",
-           label: "Price (GBP Include VAT)",
+           label: "Value Pre Kw (GBP Include VAT)",
            data: chartDataSource.map(o=>o.valueIncludeVat),
            yAxisID: "price"
-        }],
+        },{
+            type: "line",
+            label: "Price (GBP Include VAT)",
+            data: chartDataSource.map(o=>o.priceIncludeVat),
+            yAxisID: "price"
+         }],
         labels: renderChartLabel(chartDataSource)
     };
     return new Chart(chartCanvesElement, {
@@ -94,6 +98,10 @@ function resetData() {
     octopusService.getConsumptions(electricityMeter.mpan, electricityMeter.serialNumber, startDateTimeInputElement.value, endDateTimeInputElement.value);
 }
 
+function getPrice(consumption, price) {
+    return consumption * price;
+}
+
 // Event listener defined here.
 window.addEventListener("resize", function(event) {
     console.debug("window resized.");
@@ -141,6 +149,7 @@ document.addEventListener("productStandardUnitRatesCollected", function(event) {
             });
         } else {
             target[0].valueIncludeVat = value.value_inc_vat;
+            target[0].priceIncludeVat = getPrice(target[0].consumption, value.value_inc_vat)
         }
     });
     console.log(chartDataSource);
