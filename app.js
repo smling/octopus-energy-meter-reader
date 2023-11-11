@@ -16,7 +16,6 @@ const DateTime = luxon.DateTime;
 const settings = JSON.parse(UrlHelper.getDeserializedUrlParameterValue("settings"));
 const octopusProvider = settings.providers.filter((item) => item.provider.toUpperCase() === "OCTOPUS")[0];
 const octopusService = new OctopusService(CONSTANTS.octopus.root, octopusProvider.settings.apikey);
-//const octopusService = new OctopusService(CONSTANTS.octopus.root, UrlHelper.getUrlParameterValue("apikey"));
 
 // Global variables.
 let chart = null;
@@ -40,10 +39,15 @@ function renderChart() {
             yAxisID: "kw"
         },{
            type: "bar",
-           label: "Price (GBP Include VAT)",
+           label: "Value Pre Kw (GBP Include VAT)",
            data: chartDataSource.map(o=>o.valueIncludeVat),
            yAxisID: "price"
-        }],
+        },{
+            type: "line",
+            label: "Price (GBP Include VAT)",
+            data: chartDataSource.map(o=>o.priceIncludeVat),
+            yAxisID: "price"
+         }],
         labels: renderChartLabel(chartDataSource)
     };
     return new Chart(chartCanvesElement, {
@@ -53,12 +57,22 @@ function renderChart() {
                 price: {
                     type: "linear",
                     position: "left",
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value, index, ticks) {
+                            return `${value} p`;
+                        }
+                    }
                 },
                 kw: {
                     type: "linear",
                     position: "right",
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value, index, ticks) {
+                            return `${value} kw`;
+                        }
+                    }
                 }
             }
         }
@@ -67,15 +81,17 @@ function renderChart() {
 
 function renderChartLabel(chartDataSource) {
     const label = [];
+    const endDateFormat = "HH:mm";
     let index = 0;
     let currentDate = DateTime.fromISO(chartDataSource[index].startDateTime).toFormat("yyyy-LL-dd");
     do {
-        let format = "HH:mm";
+        let startDateFormat = "HH:mm";
         if(index === 0 || currentDate !== DateTime.fromISO(chartDataSource[index].startDateTime).toFormat("yyyy-LL-dd")) {
-            format = "yyyy-LL-dd HH:mm";
+            startDateFormat = "yyyy-LL-dd HH:mm";
             currentDate = DateTime.fromISO(chartDataSource[index].startDateTime).toFormat("yyyy-LL-dd");
         }
-        label.push(DateTime.fromISO(chartDataSource[index].startDateTime).toFormat(format));
+        const labelValue = `${DateTime.fromISO(chartDataSource[index].startDateTime).toFormat(startDateFormat)} - ${DateTime.fromISO(chartDataSource[index].endDateTime).toFormat(endDateFormat)}`
+        label.push(labelValue);
         index++;
     } while(index!=chartDataSource.length);
     return label;
@@ -92,6 +108,10 @@ function resetData() {
     chartDataSource = [];
     const electricityMeter = octopusProvider.settings.meters.filter(o => o.trafficCode.charAt(0) === "E")[0];
     octopusService.getConsumptions(electricityMeter.mpan, electricityMeter.serialNumber, startDateTimeInputElement.value, endDateTimeInputElement.value);
+}
+
+function getPrice(consumption, price) {
+    return consumption * price;
 }
 
 // Event listener defined here.
@@ -141,6 +161,7 @@ document.addEventListener("productStandardUnitRatesCollected", function(event) {
             });
         } else {
             target[0].valueIncludeVat = value.value_inc_vat;
+            target[0].priceIncludeVat = getPrice(target[0].consumption, value.value_inc_vat)
         }
     });
     console.log(chartDataSource);
