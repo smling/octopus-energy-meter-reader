@@ -1,5 +1,8 @@
 # :octopus:Octopus Energy Meter Reader:octopus:  #
+
 Vallilia JS Application to get data from Octopuse API and render chart in specific criteria.
+
+![Screenshot](images/Screenshot.png)
 
 ## Requirement ##
 1. Valid Octopus API Key should be exists;
@@ -8,9 +11,11 @@ Vallilia JS Application to get data from Octopuse API and render chart in specif
 :construction: In Progress :construction:
 
 ## Usage ##
-1. Execute `index.html?settings={{base64 encoded string}}` to run application. Example:
+1. Execute `index.html?settings={{base64 encoded string}}` to run application. 
+
+	Example:
     ```
-    http://localhost/index.html?settings=A1234567
+    http://localhost/index.html?settings=ewoJInByb3ZpZGVycyI6IFt7CgkJInByb3ZpZGVyIjogIm9jdG9wdXMiLAoJCSJzZXR0aW5ncyI6IHsKCQkJImFwaWtleSI6ICJhcGkga2V5IiwKCQkJInByb2R1Y3RzIjogW3sKCQkJCSJwcm9kdWN0Q29kZSI6ICJwcm9kdWN0IGNvZGUiLAoJCQkgICAgICAgICJ0cmFmZmljQ29kZSI6ICJ0cmFmZmljIGNvZGUiCgkJCX1dLAoJCQkibWV0ZXJzIjogW3sKCQkJICAgICJ0cmFmZmljQ29kZSI6ICJ0cmFmZmljIGNvZGUiLAoJCQkJIm1wYW4iOiAiTVBBTiIsCgkJCQkic2VyaWFsTnVtYmVyIjogInNlcmlhbCBuby4iCgkJCX1dCgkJfQoJfV0KfQ==
     ```
 ### Paramters ###
 | Name | Required | Description |
