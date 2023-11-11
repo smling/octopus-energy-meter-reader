@@ -3,7 +3,7 @@ export const CONSTANTS = {
         root : "https://api.octopus.energy"
     },
     settings: {
-        startBeforeToday: 7,
+        startBeforeToday: 3,
         endAfterToday: 1
     }
 }

@@ -71,15 +71,17 @@ function renderChart() {
 
 function renderChartLabel(chartDataSource) {
     const label = [];
+    const endDateFormat = "HH:mm";
     let index = 0;
     let currentDate = DateTime.fromISO(chartDataSource[index].startDateTime).toFormat("yyyy-LL-dd");
     do {
-        let format = "HH:mm";
+        let startDateFormat = "HH:mm";
         if(index === 0 || currentDate !== DateTime.fromISO(chartDataSource[index].startDateTime).toFormat("yyyy-LL-dd")) {
-            format = "yyyy-LL-dd HH:mm";
+            startDateFormat = "yyyy-LL-dd HH:mm";
             currentDate = DateTime.fromISO(chartDataSource[index].startDateTime).toFormat("yyyy-LL-dd");
         }
-        label.push(DateTime.fromISO(chartDataSource[index].startDateTime).toFormat(format));
+        const labelValue = `${DateTime.fromISO(chartDataSource[index].startDateTime).toFormat(startDateFormat)} - ${DateTime.fromISO(chartDataSource[index].endDateTime).toFormat(endDateFormat)}`
+        label.push(labelValue);
         index++;
     } while(index!=chartDataSource.length);
     return label;
