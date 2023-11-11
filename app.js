@@ -57,12 +57,22 @@ function renderChart() {
                 price: {
                     type: "linear",
                     position: "left",
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value, index, ticks) {
+                            return `${value} p`;
+                        }
+                    }
                 },
                 kw: {
                     type: "linear",
                     position: "right",
-                    beginAtZero: true
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value, index, ticks) {
+                            return `${value} kw`;
+                        }
+                    }
                 }
             }
         }
